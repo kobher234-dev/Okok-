@@ -1,0 +1,15 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/p"
+  to = "/.netlify/functions/p"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/images"
+  to = "/.netlify/functions/p"
+  status = 200
+  force = true
