@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Two-Image Link Maker</title>
+<style>
+:root{--ink:#1d1b4d;--gold:#f2b705;--paper:#faf7f0;--line:#d9d3c3}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,sans-serif;padding:20px}
+main{max-width:520px;margin:0 auto}
+h1{font:700 28px/1.2 Georgia,serif;margin:8px 0 4px}
+p.sub{margin:0 0 20px;color:#555}
+label{display:block;font-weight:600;margin:18px 0 6px}
+small{display:block;color:#666;font-weight:400}
+input{width:100%;padding:14px;border:2px solid var(--line);border-radius:10px;font-size:16px;background:#fff;color:var(--ink)}
+input:focus{outline:3px solid var(--gold);border-color:var(--ink)}
+.thumb{margin-top:8px;height:140px;border-radius:10px;background:#ece7d8 center/cover no-repeat;display:none;border:2px solid var(--line)}
+button{width:100%;margin-top:24px;padding:16px;border:0;border-radius:12px;background:var(--ink);color:#fff;font:700 18px system-ui;cursor:pointer}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+button.gold{background:var(--gold);color:var(--ink);margin-top:10px}
+#out{display:none;margin-top:24px;padding:16px;background:#fff;border:2px solid var(--ink);border-radius:12px}
+#out textarea{width:100%;height:90px;border:0;font-size:14px;color:var(--ink);resize:none;word-break:break-all}
+</style>
+</head>
+<body>
+<main>
+<h1>Two-Image Link Maker</h1>
+<p class="sub">Pehli image Facebook preview mein dikhegi. Doosri image link kholne par dikhegi.</p>
+
+<label for="a">Image 1 (preview image)<small>Facebook share card mein ye dikhegi</small></label>
+<input id="a" type="url" inputmode="url" placeholder="https://...jpg">
+<div class="thumb" id="ta"></div>
+
+<label for="b">Image 2 (link khulne par)<small>Khali chhor dein to Image 1 hi dikhegi</small></label>
+<input id="b" type="url" inputmode="url" placeholder="https://...jpg">
+<div class="thumb" id="tb"></div>
+
+<label for="t">Title (optional)</label>
+<input id="t" type="text" placeholder="Preview ka title">
+
+<button id="gen">Generate</button>
+
+<div id="out">
+  <textarea id="res" readonly></textarea>
+  <button class="gold" id="copy">Copy link</button>
+</div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+function thumb(inp, box){
+  $(inp).addEventListener('input', () => {
+    const v = $(inp).value.trim();
+    box = $(box);
+    if(/^https?:\/\//i.test(v)){ box.style.backgroundImage = 'url("'+v.replace(/"/g,'%22')+'")'; box.style.display='block'; }
+    else box.style.display='none';
+  });
+}
+thumb('a','ta'); thumb('b','tb');
+
+$('gen').onclick = () => {
+  const a = $('a').value.trim(), b = $('b').value.trim(), t = $('t').value.trim();
+  if(!/^https?:\/\//i.test(a)){ alert('Image 1 ka sahi link dalein (https:// se shuru)'); return; }
+  const short = x => { try { const y = new URL(x); if (y.hostname.endsWith('gstatic.com') && y.pathname === '/images') return y.searchParams.get('q'); } catch(e){} return null; };
+  const qa = short(a), qb = short(b);
+  let u = qa ? location.origin + '/images?q=' + qa + '&s=10' : location.origin + '/p?a=' + encodeURIComponent(a);
+  if (b) u += '&b=' + (qb || encodeURIComponent(b));
+  if (t) u += '&t=' + encodeURIComponent(t);
+  $('res').value = u;
+  $('out').style.display = 'block';
+};
+
+$('copy').onclick = async () => {
+  const v = $('res').value;
+  try { await navigator.clipboard.writeText(v); } catch(e){ $('res').select(); document.execCommand('copy'); }
+  $('copy').textContent = 'Copied';
+  setTimeout(() => $('copy').textContent = 'Copy link', 1500);
+};
+</script>
+</body>
+</html>
